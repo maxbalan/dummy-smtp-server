@@ -9,7 +9,7 @@ storage, but it does the trick for now, feel free to contribute and change it if
 
 **NOTE:** The server at the moment does not support authentication
 
-##API
+## API
 Dropwizard on top of the dummy STMP provides ways to get the emails sent through a simple API. 
 
 At the moment there is one endpoint:
@@ -29,7 +29,7 @@ this endpoint will take the recipient and return the email that it was suppose t
 
 in case the email was not found an empty JSON is returned.
 
-##How to build the application?
+## How to build the application?
 The application is using `gradle application plugin` in order to build a deployable JAR. Run following commands 
 in order to have a tar/zip built:
 
@@ -43,8 +43,8 @@ or
 
 After this commands you can find the build inside `./build/distribution` folder
 
-##DOCKER
-###How to build a docker image?
+## DOCKER
+### How to build a docker image?
 Docker file is ready to be used inside the project, you can configure it by changing following parameters:
 
 ```bash
@@ -55,7 +55,7 @@ ENV DUMMY_SMTP_SERVER_PORT 6969 - this is the dummy SMTP port
 
 **NOTE:** don't forget to export the correct API and SMTP server ports
 
-###Docker image publishing
+### Docker image publishing
 In case you have a repository where you push your docker images then there is a simple script that will 
 automate this the publishing:
 
