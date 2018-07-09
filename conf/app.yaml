@@ -1,0 +1,40 @@
+# server configuration
+server:
+  applicationConnectors:
+    - type: http
+      port: ${DUMMY_SMTP_SERVICE_PORT:-9086}
+  adminConnectors:
+    - type: http
+      port: ${DUMMY_SMTP_SERVICE_ADMIN_PORT:-9087}
+
+# logging configuration
+logging:
+  level: INFO
+
+  loggers:
+    "com.beautymoft":
+      level: DEBUG
+      additive: true
+      appenders:
+        - type: file
+          currentLogFilename: ./logs/application.log
+          threshold: ALL
+          archive: true
+          archivedLogFilenamePattern: ./logs/application-%d.log
+          archivedFileCount: 1
+          timeZone: UTC
+          logFormat: "%d{yyyy-MM-dd_HH:mm:ss.SSS} [%thread] %-5level %X{akkaSource} %logger{36} - %msg%n"
+
+  appenders:
+  - type: console # TODO remove console appender from production
+    threshold: DEBUG
+    timeZone: UTC
+    target: stdout
+    logFormat: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n"
+
+# all other configuration
+
+smtpServer:
+  port: ${DUMMY_SMTP_SERVER_PORT:-6969}
+
+
