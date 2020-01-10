@@ -1,12 +1,9 @@
-FROM openjdk:10-jre
+FROM openjdk:13.0.1-oraclelinux7
 
-MAINTAINER Max
+MAINTAINER com.github.maxbalan
 
-#adding user to sudo group
-RUN apt-get update && apt-get -y install sudo
-RUN adduser --disabled-password --gecos '' dummysmtp
-RUN adduser dummysmtp sudo
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+#adding user
+RUN useradd -ms /bin/bash dummysmtp
 
 #copy service image
 ADD build/distributions/dummy-smtp-server.tar /home/dummysmtp/
@@ -27,9 +24,7 @@ EXPOSE 6969:6969
 EXPOSE 9086:9086
 
 # Slim down the image
-RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENTRYPOINT ["/bin/bash"]
 CMD ["./entrypoint.sh"]
-#User root

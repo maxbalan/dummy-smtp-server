@@ -53,17 +53,23 @@ ENV DUMMY_SMTP_SERVICE_ADMIN_PORT 9087 - this is the admin port of the API
 ENV DUMMY_SMTP_SERVER_PORT 6969 - this is the dummy SMTP port
 ```
 
+then run:
+
+`
+./gradlew buildDockerImage
+`
+
 **NOTE:** don't forget to export the correct API and SMTP server ports
 
 ### Docker image publishing
-In case you have a repository where you push your docker images then there is a simple script that will 
-automate this the publishing:
+To publish the image you will need the following:
 
 1. make sure you logged in docker to the repository you are using
-2. configure release bash:
-```bash
-IMAGE_NAME="dummy-smtp-service" - this sets the local docker image name
-DOCKER_TAG="dummy-smtp-service" - this sets the tag which will be used when pushing the image to external repo
-DOCKER_REPO="my/repo" - this is external repo path
-```
-3 . run `./docker-release.sh`
+2. run gradle push task
+
+`
+./gradlew pushDockerImage -Pdocker_repository=[your_repository] -Pdocker_tag=[tag]
+`
+
+*docker_repository* - will set the repository were you want your image to be published
+*docker_tag* - will set the tag for published image
