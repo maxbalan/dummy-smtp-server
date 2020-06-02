@@ -12,7 +12,7 @@ logging:
   level: INFO
 
   loggers:
-    "com.beautymoft":
+    "com.github":
       level: DEBUG
       additive: true
       appenders:
