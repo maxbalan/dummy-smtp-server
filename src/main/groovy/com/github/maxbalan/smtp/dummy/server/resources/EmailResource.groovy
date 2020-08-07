@@ -40,7 +40,7 @@ class EmailResource {
             def j = tripleToJson(v)
             def c = new JSONObject()
             c.put("timestamp", k)
-            c.put("email", j)
+            c.put("data", j)
             a.put(c)
         } )
 
