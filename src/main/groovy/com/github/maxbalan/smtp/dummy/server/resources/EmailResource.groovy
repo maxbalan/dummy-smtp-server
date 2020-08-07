@@ -2,6 +2,7 @@ package com.github.maxbalan.smtp.dummy.server.resources
 
 import com.github.maxbalan.smtp.dummy.server.smtp.MailStorage
 import org.apache.commons.lang3.tuple.Triple
+import org.json.JSONArray
 import org.json.JSONObject
 
 import javax.ws.rs.GET
@@ -26,6 +27,17 @@ class EmailResource {
         def responseJson = tripleToJson(email)
 
         Response.ok().entity(responseJson.toString()).type(MediaType.APPLICATION_JSON_TYPE).build()
+    }
+
+    private def mapToJson(Map<Long, Triple> map) {
+        def a = new JSONArray()
+        map.forEach({ k, v ->
+            def j = tripleToJson(v)
+            def c = new JSONObject()
+            c.put("timestamp", k)
+            c.put("email", j)
+            a.put(c)
+        } )
     }
 
     private def tripleToJson(Triple email) {

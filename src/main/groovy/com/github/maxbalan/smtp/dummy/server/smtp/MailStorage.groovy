@@ -17,7 +17,7 @@ class MailStorage {
 
     private final Logger LOG = LoggerFactory.getLogger(MailStorage.class)
 
-    private final ConcurrentHashMap<String, Triple<String, String, String>> storage
+    private final ConcurrentHashMap<String, ConcurrentHashMap<Long, Triple<String, String, String>>> storage
 
     public MailStorage() {
         storage = new ConcurrentHashMap<>()
@@ -30,9 +30,18 @@ class MailStorage {
         def content = IOUtils.toString(data, "UTF-8")
         //store the email data in memory
         def email = new ImmutableTriple(from, to, content)
-        this.storage.put(to, email)
 
-        LOG.info("Stored Email [ $email ]")
+        if (this.storage.containsKey(to)) {
+            def s = this.storage.get(to)
+            s.put(System.nanoTime(), email)
+            this.storage.put(to, s)
+        } else {
+            def s = new ConcurrentHashMap<Long, Triple<String, String, String>>()
+            s.put(System.nanoTime(), email)
+            this.storage.put(to, s)
+        }
+
+        LOG.info("Stored datta TO [ $to ] >> Email [ $email ]")
     }
 
     public def getEmailByRecipient(String recipient) {
