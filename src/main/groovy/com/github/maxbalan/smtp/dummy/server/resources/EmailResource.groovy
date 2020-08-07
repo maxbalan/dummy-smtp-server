@@ -24,7 +24,7 @@ class EmailResource {
     @GET
     public def getEmail(@QueryParam("recipient") String recipient) {
         def email = mailStorage.getEmailByRecipient(recipient)
-        def responseJson = tripleToJson(email)
+        def responseJson = mapToJson(email)
 
         Response.ok().entity(responseJson.toString()).type(MediaType.APPLICATION_JSON_TYPE).build()
     }
