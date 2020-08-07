@@ -29,7 +29,7 @@ class EmailResource {
         Response.ok().entity(responseJson.toString()).type(MediaType.APPLICATION_JSON_TYPE).build()
     }
 
-    private def mapToJson(Map<Long, Triple> map) {
+    private JSONArray mapToJson(Map<Long, Triple> map) {
         def a = new JSONArray()
 
         if (map == null) {
@@ -43,6 +43,8 @@ class EmailResource {
             c.put("email", j)
             a.put(c)
         } )
+
+        a
     }
 
     private def tripleToJson(Triple email) {
