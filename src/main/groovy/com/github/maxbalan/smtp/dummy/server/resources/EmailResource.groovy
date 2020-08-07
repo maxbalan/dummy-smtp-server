@@ -31,6 +31,11 @@ class EmailResource {
 
     private def mapToJson(Map<Long, Triple> map) {
         def a = new JSONArray()
+
+        if (map == null) {
+            return a
+        }
+
         map.forEach({ k, v ->
             def j = tripleToJson(v)
             def c = new JSONObject()
