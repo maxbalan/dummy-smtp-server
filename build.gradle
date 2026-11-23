@@ -1,141 +1,47 @@
-
 plugins {
     id 'java'
-    id 'groovy'
-    id 'application'
+    id 'org.springframework.boot' version '4.2.0'
 }
 
-mainClassName = "com.github.maxbalan.smtp.dummy.server.DummySMTPServer"
+group = 'com.github.maxbalan'
+version = file('VERSION').text.trim()
+
+description = 'In-memory SMTP capture service for development and automated testing'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(26)
+    }
+}
 
 repositories {
-    jcenter()
-}
-
-group 'com.github.maxbalan'
-
-sourceCompatibility = 1.13
-
-ext {
-    //docker config
-    dockerRepository = 'unknown'
-    dockerTag = "unknown"
-    dockerImageName = "dummy-smtp-service"
-
-    // lib versions
-    dropwizardVersion = '2.0.0'
-    spockVersion = '1.3-groovy-2.5'
-    groovyVersion = '2.5.8'
-    jsonVersion = '20180130'
+    mavenCentral()
 }
 
 dependencies {
-    // dropwizard libraries
-    compile "io.dropwizard:dropwizard-core:$dropwizardVersion"
-    compile "io.dropwizard:dropwizard-client:$dropwizardVersion"
-    compile "io.dropwizard:dropwizard-auth:$dropwizardVersion"
+    implementation platform('org.springframework.boot:spring-boot-dependencies:4.2.0')
+    implementation platform('org.springframework.ai:spring-ai-bom:2.1.0')
+    testImplementation platform('org.springframework.boot:spring-boot-dependencies:4.2.0')
+    testImplementation platform('org.springframework.ai:spring-ai-bom:2.1.0')
 
-    // some JDK 10 dropwizard dependencies
-    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.0'
-    compile group: 'javax.activation', name: 'activation', version: '1.1.1'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.1'
+    implementation 'org.springframework.ai:spring-ai-starter-mcp-server-webmvc'
+    implementation 'com.github.davidmoten:subethasmtp:7.2.2'
+    implementation 'org.eclipse.angus:angus-mail'
 
-    //others
-    compile group: 'commons-io', name: 'commons-io', version: '2.6'
-    compile group: 'org.subethamail', name: 'subethasmtp', version: '3.1.7'
-
-    //json
-    compile "org.json:json:$jsonVersion"
-
-    //testing
-    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
-    testCompile "org.spockframework:spock-core:$spockVersion"
-
-    //required for mocking non interface
-    testCompile group: 'cglib', name: 'cglib-nodep', version: '3.2.6'
-    testCompile group: 'org.objenesis', name: 'objenesis', version: '2.6'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
 }
 
-wrapper {
-    gradleVersion = '6.0.1'
+tasks.named('test') {
+    useJUnitPlatform()
 }
 
-task copyConfig(type: Copy) {
-    from 'conf/app.yaml'
-    into 'build/scripts'
-}
-
-// Docker configuration
-// pass in the parameter as follow ./gradlw -PtestProp=test setDockerImageTag
-task setDockerImageTag(type: Task) {
-    dockerTag = project.properties["docker_tag"]
-    println "Docker image tag has been set: ${dockerTag}"
-
-    doLast {
-        if (dockerTag.equals("unknown"))
-            throw new GradleException("Failed to set docker tag!")
-    }
-}
-
-task setDockerRepository(type: Task) {
-    dockerRepository = project.properties["docker_repository"]
-    println "Docker reposity has been set: ${dockerRepository}"
-
-    doLast {
-        if (dockerRepository.equals("unknown"))
-            throw new GradleException("Failed to set docker tag!")
-    }
-}
-
-task removeDockerImage() {
-    doLast {
-        try {
-            exec {
-                commandLine 'bash', '-c', "docker rmi -f $dockerImageName"
-            }
-        } catch (Exception e) {
-            println e
-            throw new GradleException("Failed to remove docker image!")
-        }
-    }
-}
-
-task buildDockerImage() {
-    dependsOn([clean, copyConfig, distTar, removeDockerImage, setDockerImageTag, setDockerRepository])
-    doLast {
-        try {
-            exec {
-                commandLine 'bash', '-c', "docker build -t $dockerImageName ."
-            }
-        } catch (Exception e) {
-            println e
-            throw new GradleException("Failed to build docker image!")
-        }
-    }
-}
-
-task tagDockerImage() {
-    dependsOn([buildDockerImage])
-    doLast {
-        try {
-            exec {
-                commandLine 'bash', '-c', "docker tag $dockerImageName:latest $dockerRepository:$dockerTag"
-            }
-        } catch (Exception e) {
-            println e
-            throw new GradleException("Failed to tag docker image!")
-        }
-    }
-}
-
-task pushDockerImage() {
-    dependsOn([buildDockerImage, tagDockerImage])
-    doLast {
-        try {
-            exec {
-                commandLine 'bash', '-c', "docker push $dockerRepository:$dockerTag"
-            }
-        } catch (Exception e) {
-            println e
-            throw new GradleException("Failed to push docker image!")
-        }
+tasks.named('processResources') {
+    from('resources/oas/openapi.yaml') {
+        into 'static/openapi'
     }
 }

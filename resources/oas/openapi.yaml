@@ -1,0 +1,181 @@
+openapi: 3.1.0
+info:
+  title: Dummy SMTP Server API
+  version: 1.0.0
+  description: |
+    Read-only API for messages accepted by the in-memory SMTP listener.
+    Messages are ephemeral and are removed when the process restarts or the configured
+    in-memory retention limit evicts them.
+  license:
+    name: MIT
+    url: https://opensource.org/license/mit
+servers:
+  - url: /
+    description: Current service origin
+security: []
+paths:
+  /api/v1/emails:
+    get:
+      tags:
+        - Captured emails
+      operationId: listCapturedEmails
+      summary: List captured emails for a recipient
+      description: |
+        Returns messages for the exact SMTP envelope recipient, newest first. Pagination uses
+        an opaque cursor tied to this ordering. Concurrently received newer messages do not appear
+        in later pages from an existing cursor traversal.
+      parameters:
+        - name: recipient
+          in: query
+          required: true
+          description: Exact SMTP envelope recipient used during delivery.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 320
+          example: user@example.test
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of messages to return.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: cursor
+          in: query
+          required: false
+          description: Opaque cursor returned in the previous response.
+          schema:
+            type: string
+            maxLength: 256
+      responses:
+        '200':
+          description: Captured messages, possibly empty.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailCollection'
+              examples:
+                messages:
+                  value:
+                    items:
+                      - id: '42'
+                        receivedAt: '2026-01-01T12:00:00Z'
+                        sender: sender@example.test
+                        recipient: user@example.test
+                        content: |-
+                          Subject: Test message
+
+                          Hello from the test suite.
+                    pagination:
+                      cursor: djE6NDI
+                      hasNext: true
+                empty:
+                  value:
+                    items: []
+                    pagination:
+                      cursor: null
+                      hasNext: false
+        '400':
+          description: A required query parameter, limit, or cursor is invalid.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              example:
+                type: https://dummy-smtp-server.local/problems/invalid_cursor
+                title: Bad Request
+                status: 400
+                detail: Cursor is malformed
+                instance: /api/v1/emails
+                code: invalid_cursor
+                timestamp: '2026-01-01T12:00:00Z'
+        '500':
+          description: An unexpected server error occurred.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+components:
+  schemas:
+    CapturedEmail:
+      type: object
+      required:
+        - id
+        - receivedAt
+        - sender
+        - recipient
+        - content
+      properties:
+        id:
+          type: string
+          description: Process-local, monotonically increasing message identifier.
+          example: '42'
+        receivedAt:
+          type: string
+          format: date-time
+        sender:
+          type: string
+          description: SMTP envelope sender.
+        recipient:
+          type: string
+          description: SMTP envelope recipient.
+        content:
+          type: string
+          description: Raw SMTP message content decoded as UTF-8.
+    EmailCollection:
+      type: object
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CapturedEmail'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    Pagination:
+      type: object
+      required:
+        - cursor
+        - hasNext
+      properties:
+        cursor:
+          type:
+            - string
+            - 'null'
+          description: Cursor for the next page, or null when no further page exists.
+        hasNext:
+          type: boolean
+    ApiError:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+        - instance
+        - code
+        - timestamp
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail:
+          type: string
+        instance:
+          type: string
+        code:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

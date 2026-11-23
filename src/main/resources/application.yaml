@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: dummy-smtp-server
+  lifecycle:
+    timeout-per-shutdown-phase: 10s
+  ai:
+    mcp:
+      server:
+        enabled: ${DUMMY_SMTP_MCP_ENABLED:true}
+        protocol: STREAMABLE
+        type: SYNC
+        name: dummy-smtp-server
+        version: 1.0.0
+        instructions: >-
+          Capture test messages through SMTP, inspect messages by exact recipient, and check service health.
+        request-timeout: 20s
+        capabilities:
+          tool: true
+          resource: false
+          prompt: false
+          completion: false
+        streamable-http:
+          mcp-endpoint: /mcp
+          keep-alive-interval: 30s
+
+server:
+  port: ${DUMMY_SMTP_SERVICE_PORT:9086}
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    url: /openapi/openapi.yaml
+    disable-swagger-default-url: true
+
+smtp:
+  server:
+    host: ${DUMMY_SMTP_SERVER_HOST:0.0.0.0}
+    port: ${DUMMY_SMTP_SERVER_PORT:6969}
+    max-message-size-bytes: ${DUMMY_SMTP_MAX_MESSAGE_SIZE_BYTES:1048576}
+    max-connections: ${DUMMY_SMTP_MAX_CONNECTIONS:20}
+
+email:
+  storage:
+    max-total-messages: ${DUMMY_SMTP_MAX_TOTAL_MESSAGES:100}
