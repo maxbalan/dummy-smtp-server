@@ -1,3 +1,7 @@
+[1.0.1]
+  Bugs
+    - Fix Swagger UI contract loading by serving the packaged OpenAPI document from its configured endpoint
+---
 [1.0.0]
   Features
     - Add a versioned cursor-paginated API for retrieving captured messages with standardized problem responses

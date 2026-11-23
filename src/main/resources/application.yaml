@@ -10,7 +10,7 @@ spring:
         protocol: STREAMABLE
         type: SYNC
         name: dummy-smtp-server
-        version: 1.0.0
+        version: 1.0.1
         instructions: >-
           Capture test messages through SMTP, inspect messages by exact recipient, and check service health.
         request-timeout: 20s

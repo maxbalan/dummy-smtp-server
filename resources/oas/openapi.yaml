@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Dummy SMTP Server API
-  version: 1.0.0
+  version: 1.0.1
   description: |
     Read-only API for messages accepted by the in-memory SMTP listener.
     Messages are ephemeral and are removed when the process restarts or the configured

@@ -27,6 +27,7 @@ Default listeners:
 | HTTP API | `http://localhost:9086` |
 | MCP | `http://localhost:9086/mcp` |
 | Swagger UI | `http://localhost:9086/swagger-ui.html` |
+| OpenAPI contract | `http://localhost:9086/openapi/openapi.yaml` |
 | Health | `http://localhost:9086/actuator/health` |
 
 Send a message with any SMTP client, without authentication or TLS. For example:
@@ -45,7 +46,8 @@ MAIL
 ## API
 
 The canonical OpenAPI 3.1 contract is [`resources/oas/openapi.yaml`](resources/oas/openapi.yaml).
-The API uses path-based major versioning and RFC-style problem responses.
+The running service exposes the packaged contract at `/openapi/openapi.yaml` for Swagger UI and
+other API tooling. The API uses path-based major versioning and RFC-style problem responses.
 
 ```http
 GET /api/v1/emails?recipient=user@example.test&limit=50&cursor=<opaque-cursor>

@@ -33,8 +33,9 @@ MCP tool, and Streamable HTTP MCP protocol tests. `make build` runs a clean `boo
 | Embedded MCP server | `DUMMY_SMTP_MCP_ENABLED` | `true` |
 
 Spring Actuator exposes health and info endpoints. Graceful shutdown has a ten-second phase timeout.
-Swagger UI reads the committed contract copied into the jar at build time. Spring AI exposes the
-synchronous Streamable HTTP MCP endpoint at `/mcp` on the same HTTP port.
+Swagger UI reads the committed contract copied into the jar at build time and served through the
+explicit `/openapi/openapi.yaml` classpath resource mapping. Spring AI exposes the synchronous
+Streamable HTTP MCP endpoint at `/mcp` on the same HTTP port.
 
 ## OpenAPI workflow
 

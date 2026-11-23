@@ -21,7 +21,8 @@ message is evicted when the configured retention limit is exceeded.
   opaque `cursor` query parameters.
 - MCP access through [`resources/docs/mcp-access/feature.md`](../mcp-access/feature.md), which reuses
   the same query semantics and sends through the real SMTP listener.
-- OpenAPI 3.1 contract at [`resources/oas/openapi.yaml`](../../oas/openapi.yaml).
+- OpenAPI 3.1 contract at [`resources/oas/openapi.yaml`](../../oas/openapi.yaml), packaged and served
+  at `/openapi/openapi.yaml` for Swagger UI and other API tooling.
 
 The HTTP response owns its transport shape and does not serialize the internal storage record. It
 returns newest messages first using the standard `items` and `pagination` envelope.
@@ -34,7 +35,12 @@ sequenceDiagram
     participant SMTP as SMTP listener
     participant Store as Bounded email store
     participant APIClient as Test or developer
+    participant Docs as Swagger UI and OpenAPI
     participant API as GET /api/v1/emails
+
+    APIClient->>Docs: Open API documentation
+    Docs->>Docs: Load /openapi/openapi.yaml
+    Docs-->>APIClient: Render the versioned API contract
 
     Client->>SMTP: SMTP envelope and message data
     SMTP->>Store: Save sender, recipient, raw content
@@ -63,6 +69,7 @@ sequenceDiagram
 - `email.EmailQueryService` owns shared REST and MCP query validation and pagination orchestration.
 - `controller.email.EmailService` maps internal messages to API-owned response records.
 - `controller.email.EmailController` exposes the `/api/v1` boundary.
+- `core.http.OpenApiResourceConfiguration` serves the packaged contract used by Swagger UI.
 - `controller.GlobalExceptionHandler` renders stable problem responses.
 
 The feature depends on Spring Boot Web, Validation, Actuator, Springdoc, and SubEtha SMTP. It has no
